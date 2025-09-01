@@ -1,0 +1,3050 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VendedorApp - Organize seu Negócio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 80px;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #f5f7f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            background-color: var(--dark-color);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            transition: all 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+        
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .sidebar-title,
+        .sidebar.collapsed .sidebar-version,
+        .sidebar.collapsed .btn-text {
+            display: none;
+        }
+        
+        .sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding: 0.8rem 0.5rem;
+        }
+        
+        .sidebar.collapsed .nav-link i {
+            margin-right: 0;
+            font-size: 1.2rem;
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+        
+        .sidebar-title {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .sidebar-version {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+        }
+        
+        .sidebar-toggle {
+            position: absolute;
+            top: 50%;
+            right: -15px;
+            transform: translateY(-50%);
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-toggle:hover {
+            background-color: #2980b9;
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .sidebar-nav {
+            flex: 1;
+            padding: 1rem;
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.8rem 1rem;
+            margin: 0.2rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .nav-link i {
+            margin-right: 0.8rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-footer .btn {
+            margin: 0.2rem 0;
+            width: 100%;
+        }
+        
+        .sidebar.collapsed .sidebar-footer .btn {
+            padding: 0.5rem;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: margin-left 0.3s ease-in-out;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+        }
+        
+        .sidebar.collapsed + .main-content {
+            margin-left: var(--sidebar-collapsed-width);
+            width: calc(100% - var(--sidebar-collapsed-width));
+        }
+        
+        /* Content Container */
+        .content-container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        /* Cards */
+        .card-dashboard {
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: none;
+            overflow: hidden;
+        }
+        
+        .card-dashboard:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stats-icon {
+            font-size: 2.5rem;
+            opacity: 0.7;
+        }
+        
+        /* Buttons */
+        .btn {
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #2980b9);
+            border: none;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--secondary-color), #27ae60);
+            border: none;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent-color), #c0392b);
+            border: none;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-color), #e67e22);
+            border: none;
+        }
+        
+        /* Sections */
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Tables */
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+        }
+        
+        .table {
+            margin-bottom: 0;
+            width: 100%;
+        }
+        
+        .table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .table tbody tr {
+            transition: background-color 0.3s ease;
+        }
+        
+        .table tbody tr:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        /* Forms */
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        
+        /* Modals */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), #2980b9);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+        }
+        
+        .toast {
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Search and Filter */
+        .search-filter-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner-border {
+            color: var(--primary-color);
+        }
+        
+        /* Mobile Styles */
+        @media (max-width: 991px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 70px 15px 15px 15px;
+            }
+            
+            .mobile-menu-toggle {
+                position: fixed;
+                top: 15px;
+                left: 15px;
+                z-index: 1001;
+                background-color: var(--primary-color);
+                border: none;
+                color: white;
+                padding: 10px;
+                border-radius: 5px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                transition: all 0.3s ease;
+            }
+            
+            .mobile-menu-toggle:hover {
+                background-color: #2980b9;
+                transform: scale(1.05);
+            }
+            
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+                display: none;
+            }
+            
+            .sidebar-overlay.show {
+                display: block;
+            }
+            
+            .sidebar-toggle {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .main-content {
+                padding: 70px 10px 10px 10px;
+            }
+            
+            .card-dashboard {
+                margin-bottom: 15px;
+            }
+            
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+            
+            .btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.875rem;
+            }
+            
+            .stats-icon {
+                font-size: 2rem;
+            }
+            
+            .modal-dialog {
+                margin: 10px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .col-6 {
+                margin-bottom: 10px;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .btn-group-vertical .btn {
+                margin-bottom: 5px;
+            }
+        }
+        
+        /* Print Styles */
+        @media print {
+            .sidebar, .mobile-menu-toggle, .btn {
+                display: none !important;
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle d-lg-none" id="mobileMenuToggle">
+        <i class="bi bi-list"></i>
+    </button>
+    
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
+    
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3 class="sidebar-title"><i class="bi bi-cart-check"></i> <span class="nav-text">VendedorApp</span></h3>
+                <small class="sidebar-version">v2.3</small>
+                <button class="sidebar-toggle d-none d-lg-block" id="sidebarToggle">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+            </div>
+            
+            <div class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-section="dashboard">
+                            <i class="bi bi-speedometer2"></i> <span class="nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-section="produtos">
+                            <i class="bi bi-box-seam"></i> <span class="nav-text">Produtos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-section="vendas">
+                            <i class="bi bi-currency-dollar"></i> <span class="nav-text">Vendas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-section="clientes">
+                            <i class="bi bi-people"></i> <span class="nav-text">Clientes</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-section="caixa">
+                            <i class="bi bi-cash-coin"></i> <span class="nav-text">Caixa</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-section="relatorios">
+                            <i class="bi bi-bar-chart"></i> <span class="nav-text">Relatórios</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://forms.gle/LQC4CYU3PbzqdGXr9" target="_blank">
+                            <i class="bi bi-star"></i> <span class="nav-text">Pesquisa de Satisfação</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-footer">
+                <button id="exportData" class="btn btn-outline-light btn-sm mb-2">
+                    <i class="bi bi-download"></i> <span class="btn-text">Exportar</span>
+                </button>
+                <button id="importData" class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-upload"></i> <span class="btn-text">Importar</span>
+                </button>
+                <input type="file" id="importFile" style="display: none;" accept=".json">
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="content-container">
+                <!-- Dashboard Section -->
+                <div id="dashboard" class="section active">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Dashboard</h2>
+                        <button class="btn btn-primary" onclick="DashboardManager.atualizarDashboard()">
+                            <i class="bi bi-arrow-clockwise"></i> Atualizar
+                        </button>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 mb-4">
+                            <div class="card card-dashboard bg-primary text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="card-title mb-1">Vendas Hoje</h6>
+                                            <h3 class="mb-0" id="vendas-hoje">R$ 0,00</h3>
+                                        </div>
+                                        <div>
+                                            <i class="bi bi-currency-dollar stats-icon"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-6 mb-4">
+                            <div class="card card-dashboard bg-success text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="card-title mb-1">Total no Caixa</h6>
+                                            <h3 class="mb-0" id="total-caixa">R$ 0,00</h3>
+                                        </div>
+                                        <div>
+                                            <i class="bi bi-wallet2 stats-icon"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-6 mb-4">
+                            <div class="card card-dashboard bg-warning text-dark">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="card-title mb-1">Produtos em Estoque</h6>
+                                            <h3 class="mb-0" id="total-produtos">0</h3>
+                                        </div>
+                                        <div>
+                                            <i class="bi bi-box-seam stats-icon"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-6 mb-4">
+                            <div class="card card-dashboard bg-info text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="card-title mb-1">Clientes Cadastrados</h6>
+                                            <h3 class="mb-0" id="total-clientes">0</h3>
+                                        </div>
+                                        <div>
+                                            <i class="bi bi-people stats-icon"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-lg-8 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Vendas Recentes</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0" id="vendas-recentes-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Data</th>
+                                                    <th>Cliente</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="3" class="text-center text-muted">Nenhuma venda registrada</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Produtos com Baixo Estoque</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0" id="estoque-baixo-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Produto</th>
+                                                    <th>Estoque</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="2" class="text-center text-muted">Todos os produtos com estoque adequado</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Produtos Section -->
+                <div id="produtos" class="section">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Gestão de Produtos</h2>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#produtoModal">
+                            <i class="bi bi-plus-circle"></i> Novo Produto
+                        </button>
+                    </div>
+                    
+                    <!-- Search and Filter -->
+                    <div class="search-filter-container">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" id="searchProdutos" placeholder="Buscar produtos...">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <select class="form-select" id="filterCategoria">
+                                    <option value="">Todas as categorias</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <select class="form-select" id="filterEstoque">
+                                    <option value="">Todos os estoques</option>
+                                    <option value="baixo">Estoque baixo (≤5)</option>
+                                    <option value="medio">Estoque médio (6-20)</option>
+                                    <option value="alto">Estoque alto (>20)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="bi bi-box-seam"></i> Lista de Produtos</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="loading-spinner" id="loadingProdutos">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0" id="produtos-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>Preço</th>
+                                            <th>Estoque</th>
+                                            <th>Categoria</th>
+                                            <th>Código</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted">Nenhum produto cadastrado</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Produto -->
+                <div class="modal fade" id="produtoModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="produtoModalTitle">
+                                    <i class="bi bi-plus-circle"></i> Novo Produto
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="form-produto">
+                                    <input type="hidden" id="produto-id">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="produto-nome" class="form-label">Nome do Produto *</label>
+                                            <input type="text" class="form-control" id="produto-nome" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="produto-preco" class="form-label">Preço (R$) *</label>
+                                            <input type="number" step="0.01" min="0" class="form-control" id="produto-preco" required>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="produto-estoque" class="form-label">Estoque *</label>
+                                            <input type="number" min="0" class="form-control" id="produto-estoque" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="produto-categoria" class="form-label">Categoria</label>
+                                            <input type="text" class="form-control" id="produto-categoria" list="categorias-list">
+                                            <datalist id="categorias-list"></datalist>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="produto-codigo" class="form-label">Código do Produto</label>
+                                        <input type="text" class="form-control" id="produto-codigo" placeholder="Deixe em branco para gerar automaticamente">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="produto-descricao" class="form-label">Descrição</label>
+                                        <textarea class="form-control" id="produto-descricao" rows="3"></textarea>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" form="form-produto" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> Salvar Produto
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Vendas Section -->
+                <div id="vendas" class="section">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Registro de Vendas</h2>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#vendaModal">
+                            <i class="bi bi-plus-circle"></i> Nova Venda
+                        </button>
+                    </div>
+                    
+                    <!-- Search and Filter -->
+                    <div class="search-filter-container">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" id="searchVendas" placeholder="Buscar vendas...">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <input type="date" class="form-control" id="filterDataInicio" placeholder="Data início">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <input type="date" class="form-control" id="filterDataFim" placeholder="Data fim">
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <select class="form-select" id="filterStatusVenda">
+                                    <option value="">Todos os status</option>
+                                    <option value="pago">Pago</option>
+                                    <option value="pendente">Pendente</option>
+                                    <option value="cancelado">Cancelado</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="bi bi-currency-dollar"></i> Histórico de Vendas</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0" id="vendas-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>Cliente</th>
+                                            <th>Total</th>
+                                            <th>Pagamento</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted">Nenhuma venda registrada</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Venda -->
+                <div class="modal fade" id="vendaModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-plus-circle"></i> Nova Venda
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="form-venda">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="venda-cliente" class="form-label">Cliente</label>
+                                            <select class="form-select" id="venda-cliente">
+                                                <option value="">Selecione um cliente</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="venda-data" class="form-label">Data da Venda</label>
+                                            <input type="datetime-local" class="form-control" id="venda-data" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Produtos</label>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <select class="form-select" id="produto-select">
+                                                    <option value="">Selecione um produto</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <input type="number" class="form-control" id="produto-quantidade" placeholder="Qtd" min="1">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <button type="button" class="btn btn-success w-100" id="adicionar-produto">
+                                                    <i class="bi bi-plus"></i> Adicionar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm" id="produtos-venda-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Produto</th>
+                                                        <th>Preço</th>
+                                                        <th>Qtd</th>
+                                                        <th>Subtotal</th>
+                                                        <th>Ação</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td colspan="5" class="text-center text-muted">Nenhum produto adicionado</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="venda-desconto" class="form-label">Desconto (R$)</label>
+                                            <input type="number" step="0.01" min="0" class="form-control" id="venda-desconto" value="0">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="venda-total" class="form-label">Total</label>
+                                            <input type="text" class="form-control" id="venda-total" readonly>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="venda-pagamento" class="form-label">Forma de Pagamento</label>
+                                            <select class="form-select" id="venda-pagamento" required>
+                                                <option value="">Selecione</option>
+                                                <option value="dinheiro">Dinheiro</option>
+                                                <option value="cartao">Cartão</option>
+                                                <option value="pix">PIX</option>
+                                                <option value="crediario">Crediário</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3" id="parcelas-container" style="display: none;">
+                                            <label for="venda-parcelas" class="form-label">Número de Parcelas</label>
+                                            <select class="form-select" id="venda-parcelas">
+                                                <option value="1">1x</option>
+                                                <option value="2">2x</option>
+                                                <option value="3">3x</option>
+                                                <option value="4">4x</option>
+                                                <option value="5">5x</option>
+                                                <option value="6">6x</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="venda-observacoes" class="form-label">Observações</label>
+                                        <textarea class="form-control" id="venda-observacoes" rows="2"></textarea>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" form="form-venda" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> Registrar Venda
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Clientes Section -->
+                <div id="clientes" class="section">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Gestão de Clientes</h2>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clienteModal">
+                            <i class="bi bi-plus-circle"></i> Novo Cliente
+                        </button>
+                    </div>
+                    
+                    <!-- Search and Filter -->
+                    <div class="search-filter-container">
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" id="searchClientes" placeholder="Buscar clientes...">
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <select class="form-select" id="filterTipoCliente">
+                                    <option value="">Todos os tipos</option>
+                                    <option value="pessoa_fisica">Pessoa Física</option>
+                                    <option value="pessoa_juridica">Pessoa Jurídica</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="bi bi-people"></i> Lista de Clientes</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0" id="clientes-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>Documento</th>
+                                            <th>Telefone</th>
+                                            <th>Email</th>
+                                            <th>Tipo</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted">Nenhum cliente cadastrado</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Cliente -->
+                <div class="modal fade" id="clienteModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="clienteModalTitle">
+                                    <i class="bi bi-plus-circle"></i> Novo Cliente
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="form-cliente">
+                                    <input type="hidden" id="cliente-id">
+                                    <div class="row">
+                                        <div class="col-md-8 mb-3">
+                                            <label for="cliente-nome" class="form-label">Nome/Razão Social *</label>
+                                            <input type="text" class="form-control" id="cliente-nome" required>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="cliente-tipo" class="form-label">Tipo *</label>
+                                            <select class="form-select" id="cliente-tipo" required>
+                                                <option value="">Selecione</option>
+                                                <option value="pessoa_fisica">Pessoa Física</option>
+                                                <option value="pessoa_juridica">Pessoa Jurídica</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="cliente-documento" class="form-label">CPF/CNPJ *</label>
+                                            <input type="text" class="form-control" id="cliente-documento" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="cliente-telefone" class="form-label">Telefone</label>
+                                            <input type="tel" class="form-control" id="cliente-telefone">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="cliente-email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="cliente-email">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="cliente-endereco" class="form-label">Endereço</label>
+                                        <textarea class="form-control" id="cliente-endereco" rows="2"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="cliente-observacoes" class="form-label">Observações</label>
+                                        <textarea class="form-control" id="cliente-observacoes" rows="2"></textarea>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" form="form-cliente" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> Salvar Cliente
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Caixa Section -->
+                <div id="caixa" class="section">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Controle de Caixa</h2>
+                        <div>
+                            <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#entradaCaixaModal">
+                                <i class="bi bi-plus-circle"></i> Entrada
+                            </button>
+                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#saidaCaixaModal">
+                                <i class="bi bi-dash-circle"></i> Saída
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-lg-4 mb-3">
+                            <div class="card card-dashboard bg-success text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="card-title mb-1">Saldo Atual</h6>
+                                            <h3 class="mb-0" id="saldo-atual">R$ 0,00</h3>
+                                        </div>
+                                        <div>
+                                            <i class="bi bi-wallet2 stats-icon"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mb-3">
+                            <div class="card card-dashboard bg-primary text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="card-title mb-1">Entradas Hoje</h6>
+                                            <h3 class="mb-0" id="entradas-hoje">R$ 0,00</h3>
+                                        </div>
+                                        <div>
+                                            <i class="bi bi-arrow-up-circle stats-icon"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mb-3">
+                            <div class="card card-dashboard bg-danger text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="card-title mb-1">Saídas Hoje</h6>
+                                            <h3 class="mb-0" id="saidas-hoje">R$ 0,00</h3>
+                                        </div>
+                                        <div>
+                                            <i class="bi bi-arrow-down-circle stats-icon"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Search and Filter -->
+                    <div class="search-filter-container">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" id="searchCaixa" placeholder="Buscar movimentações...">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <input type="date" class="form-control" id="filterDataCaixaInicio" placeholder="Data início">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <input type="date" class="form-control" id="filterDataCaixaFim" placeholder="Data fim">
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <select class="form-select" id="filterTipoCaixa">
+                                    <option value="">Todos os tipos</option>
+                                    <option value="entrada">Entrada</option>
+                                    <option value="saida">Saída</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="bi bi-cash-coin"></i> Movimentações do Caixa</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0" id="caixa-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>Tipo</th>
+                                            <th>Descrição</th>
+                                            <th>Valor</th>
+                                            <th>Saldo</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted">Nenhuma movimentação registrada</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Entrada Caixa -->
+                <div class="modal fade" id="entradaCaixaModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-plus-circle"></i> Entrada no Caixa
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="form-entrada-caixa">
+                                    <div class="mb-3">
+                                        <label for="entrada-valor" class="form-label">Valor (R$) *</label>
+                                        <input type="number" step="0.01" min="0.01" class="form-control" id="entrada-valor" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="entrada-descricao" class="form-label">Descrição *</label>
+                                        <input type="text" class="form-control" id="entrada-descricao" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="entrada-data" class="form-label">Data/Hora</label>
+                                        <input type="datetime-local" class="form-control" id="entrada-data">
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" form="form-entrada-caixa" class="btn btn-success">
+                                    <i class="bi bi-check-circle"></i> Registrar Entrada
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Saída Caixa -->
+                <div class="modal fade" id="saidaCaixaModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-dash-circle"></i> Saída do Caixa
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="form-saida-caixa">
+                                    <div class="mb-3">
+                                        <label for="saida-valor" class="form-label">Valor (R$) *</label>
+                                        <input type="number" step="0.01" min="0.01" class="form-control" id="saida-valor" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="saida-descricao" class="form-label">Descrição *</label>
+                                        <input type="text" class="form-control" id="saida-descricao" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="saida-data" class="form-label">Data/Hora</label>
+                                        <input type="datetime-local" class="form-control" id="saida-data">
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" form="form-saida-caixa" class="btn btn-danger">
+                                    <i class="bi bi-check-circle"></i> Registrar Saída
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Relatórios Section -->
+                <div id="relatorios" class="section">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Relatórios</h2>
+                        <button class="btn btn-primary" onclick="RelatoriosManager.gerarRelatorios()">
+                            <i class="bi bi-arrow-clockwise"></i> Atualizar Relatórios
+                        </button>
+                    </div>
+                    
+                    <!-- Filtros de Período -->
+                    <div class="search-filter-container">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="relatorio-data-inicio" class="form-label">Data Início</label>
+                                <input type="date" class="form-control" id="relatorio-data-inicio">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="relatorio-data-fim" class="form-label">Data Fim</label>
+                                <input type="date" class="form-control" id="relatorio-data-fim">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="relatorio-periodo" class="form-label">Período Rápido</label>
+                                <select class="form-select" id="relatorio-periodo">
+                                    <option value="">Personalizado</option>
+                                    <option value="hoje">Hoje</option>
+                                    <option value="semana">Esta Semana</option>
+                                    <option value="mes">Este Mês</option>
+                                    <option value="ano">Este Ano</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3 d-flex align-items-end">
+                                <button class="btn btn-success w-100" onclick="RelatoriosManager.filtrarPorPeriodo()">
+                                    <i class="bi bi-funnel"></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cards de Resumo -->
+                    <div class="row mb-4">
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card card-dashboard bg-primary text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="card-title mb-1">Total de Vendas</h6>
+                                            <h3 class="mb-0" id="relatorio-total-vendas">R$ 0,00</h3>
+                                        </div>
+                                        <div>
+                                            <i class="bi bi-currency-dollar stats-icon"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card card-dashboard bg-success text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="card-title mb-1">Número de Vendas</h6>
+                                            <h3 class="mb-0" id="relatorio-num-vendas">0</h3>
+                                        </div>
+                                        <div>
+                                            <i class="bi bi-cart-check stats-icon"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card card-dashboard bg-warning text-dark">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="card-title mb-1">Ticket Médio</h6>
+                                            <h3 class="mb-0" id="relatorio-ticket-medio">R$ 0,00</h3>
+                                        </div>
+                                        <div>
+                                            <i class="bi bi-graph-up stats-icon"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card card-dashboard bg-info text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="card-title mb-1">Produtos Vendidos</h6>
+                                            <h3 class="mb-0" id="relatorio-produtos-vendidos">0</h3>
+                                        </div>
+                                        <div>
+                                            <i class="bi bi-box-seam stats-icon"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Vendas por Período -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Vendas por Período</h5>
+                                    <button class="btn btn-outline-light btn-sm" onclick="RelatoriosManager.exportarRelatorio('vendas-periodo')">
+                                        <i class="bi bi-download"></i> Exportar
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0" id="relatorio-vendas-periodo">
+                                            <thead>
+                                                <tr>
+                                                    <th>Data</th>
+                                                    <th>Vendas</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="3" class="text-center text-muted">Nenhum dado disponível</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Produtos Mais Vendidos -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0"><i class="bi bi-trophy"></i> Produtos Mais Vendidos</h5>
+                                    <button class="btn btn-outline-light btn-sm" onclick="RelatoriosManager.exportarRelatorio('produtos-mais-vendidos')">
+                                        <i class="bi bi-download"></i> Exportar
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0" id="relatorio-produtos-mais-vendidos">
+                                            <thead>
+                                                <tr>
+                                                    <th>Produto</th>
+                                                    <th>Qtd Vendida</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="3" class="text-center text-muted">Nenhum dado disponível</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Formas de Pagamento -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0"><i class="bi bi-credit-card"></i> Formas de Pagamento</h5>
+                                    <button class="btn btn-outline-dark btn-sm" onclick="RelatoriosManager.exportarRelatorio('formas-pagamento')">
+                                        <i class="bi bi-download"></i> Exportar
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0" id="relatorio-formas-pagamento">
+                                            <thead>
+                                                <tr>
+                                                    <th>Forma de Pagamento</th>
+                                                    <th>Vendas</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="3" class="text-center text-muted">Nenhum dado disponível</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Clientes Mais Ativos -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0"><i class="bi bi-people"></i> Clientes Mais Ativos</h5>
+                                    <button class="btn btn-outline-light btn-sm" onclick="RelatoriosManager.exportarRelatorio('clientes-mais-ativos')">
+                                        <i class="bi bi-download"></i> Exportar
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0" id="relatorio-clientes-mais-ativos">
+                                            <thead>
+                                                <tr>
+                                                    <th>Cliente</th>
+                                                    <th>Compras</th>
+                                                    <th>Total Gasto</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="3" class="text-center text-muted">Nenhum dado disponível</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Utilitários
+        class Utils {
+            static formatarMoeda(valor) {
+                return new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                }).format(valor);
+            }
+            
+            static formatarData(data) {
+                return new Date(data).toLocaleDateString('pt-BR');
+            }
+            
+            static formatarDataHora(data) {
+                return new Date(data).toLocaleString('pt-BR');
+            }
+            
+            static gerarId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+            
+            static validarCPF(cpf) {
+                cpf = cpf.replace(/[^\d]+/g, '');
+                if (cpf.length !== 11 || !!cpf.match(/(\d)\1{10}/)) return false;
+                
+                let soma = 0;
+                let resto;
+                
+                for (let i = 1; i <= 9; i++) {
+                    soma += parseInt(cpf.substring(i-1, i)) * (11 - i);
+                }
+                
+                resto = (soma * 10) % 11;
+                if ((resto === 10) || (resto === 11)) resto = 0;
+                if (resto !== parseInt(cpf.substring(9, 10))) return false;
+                
+                soma = 0;
+                for (let i = 1; i <= 10; i++) {
+                    soma += parseInt(cpf.substring(i-1, i)) * (12 - i);
+                }
+                
+                resto = (soma * 10) % 11;
+                if ((resto === 10) || (resto === 11)) resto = 0;
+                if (resto !== parseInt(cpf.substring(10, 11))) return false;
+                
+                return true;
+            }
+            
+            static validarCNPJ(cnpj) {
+                cnpj = cnpj.replace(/[^\d]+/g, '');
+                if (cnpj.length !== 14) return false;
+                
+                let tamanho = cnpj.length - 2;
+                let numeros = cnpj.substring(0, tamanho);
+                let digitos = cnpj.substring(tamanho);
+                let soma = 0;
+                let pos = tamanho - 7;
+                
+                for (let i = tamanho; i >= 1; i--) {
+                    soma += numeros.charAt(tamanho - i) * pos--;
+                    if (pos < 2) pos = 9;
+                }
+                
+                let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+                if (resultado !== parseInt(digitos.charAt(0))) return false;
+                
+                tamanho = tamanho + 1;
+                numeros = cnpj.substring(0, tamanho);
+                soma = 0;
+                pos = tamanho - 7;
+                
+                for (let i = tamanho; i >= 1; i--) {
+                    soma += numeros.charAt(tamanho - i) * pos--;
+                    if (pos < 2) pos = 9;
+                }
+                
+                resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+                if (resultado !== parseInt(digitos.charAt(1))) return false;
+                
+                return true;
+            }
+            
+            static mostrarToast(mensagem, tipo = 'success') {
+                const toastContainer = document.querySelector('.toast-container');
+                const toastId = 'toast-' + Date.now();
+                
+                const toastHTML = `
+                    <div class="toast" id="${toastId}" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header bg-${tipo} text-white">
+                            <i class="bi bi-${tipo === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                            <strong class="me-auto">${tipo === 'success' ? 'Sucesso' : 'Erro'}</strong>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                        </div>
+                        <div class="toast-body">
+                            ${mensagem}
+                        </div>
+                    </div>
+                `;
+                
+                toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+                const toast = new bootstrap.Toast(document.getElementById(toastId));
+                toast.show();
+                
+                setTimeout(() => {
+                    const toastElement = document.getElementById(toastId);
+                    if (toastElement) {
+                        toastElement.remove();
+                    }
+                }, 5000);
+            }
+        }
+
+        // Gerenciador de Armazenamento Local
+        class StorageManager {
+            static salvar(chave, dados) {
+                localStorage.setItem(chave, JSON.stringify(dados));
+            }
+            
+            static carregar(chave) {
+                const dados = localStorage.getItem(chave);
+                return dados ? JSON.parse(dados) : [];
+            }
+            
+            static exportarTodos() {
+                const dados = {
+                    produtos: this.carregar('produtos'),
+                    clientes: this.carregar('clientes'),
+                    vendas: this.carregar('vendas'),
+                    caixa: this.carregar('caixa'),
+                    dataExportacao: new Date().toISOString()
+                };
+                
+                const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `vendedorapp-backup-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                Utils.mostrarToast('Dados exportados com sucesso!');
+            }
+            
+            static importarTodos(arquivo) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const dados = JSON.parse(e.target.result);
+                        
+                        if (dados.produtos) StorageManager.salvar('produtos', dados.produtos);
+                        if (dados.clientes) StorageManager.salvar('clientes', dados.clientes);
+                        if (dados.vendas) StorageManager.salvar('vendas', dados.vendas);
+                        if (dados.caixa) StorageManager.salvar('caixa', dados.caixa);
+                        
+                        Utils.mostrarToast('Dados importados com sucesso!');
+                        location.reload();
+                    } catch (error) {
+                        Utils.mostrarToast('Erro ao importar dados. Verifique o arquivo.', 'danger');
+                    }
+                };
+                reader.readAsText(arquivo);
+            }
+        }
+
+        // Gerenciador de Produtos
+        class ProdutoManager {
+            static produtos = StorageManager.carregar('produtos');
+            
+            static salvarProdutos() {
+                StorageManager.salvar('produtos', this.produtos);
+            }
+            
+            static adicionarProduto(produto) {
+                produto.id = Utils.gerarId();
+                produto.codigo = produto.codigo || this.gerarCodigo();
+                produto.dataCadastro = new Date().toISOString();
+                this.produtos.push(produto);
+                this.salvarProdutos();
+                this.atualizarTabela();
+                this.atualizarCategorias();
+                this.carregarProdutosSelect(); // CORREÇÃO: Atualizar select de produtos
+                Utils.mostrarToast('Produto cadastrado com sucesso!');
+            }
+            
+            static editarProduto(id, produtoAtualizado) {
+                const index = this.produtos.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    this.produtos[index] = { ...this.produtos[index], ...produtoAtualizado };
+                    this.salvarProdutos();
+                    this.atualizarTabela();
+                    this.atualizarCategorias();
+                    this.carregarProdutosSelect(); // CORREÇÃO: Atualizar select de produtos
+                    Utils.mostrarToast('Produto atualizado com sucesso!');
+                }
+            }
+            
+            static excluirProduto(id) {
+                if (confirm('Tem certeza que deseja excluir este produto?')) {
+                    this.produtos = this.produtos.filter(p => p.id !== id);
+                    this.salvarProdutos();
+                    this.atualizarTabela();
+                    this.atualizarCategorias();
+                    this.carregarProdutosSelect(); // CORREÇÃO: Atualizar select de produtos
+                    Utils.mostrarToast('Produto excluído com sucesso!');
+                }
+            }
+            
+            static gerarCodigo() {
+                return 'PROD' + Date.now().toString().slice(-6);
+            }
+            
+            static atualizarEstoque(produtoId, quantidade) {
+                const produto = this.produtos.find(p => p.id === produtoId);
+                if (produto) {
+                    produto.estoque -= quantidade;
+                    this.salvarProdutos();
+                    this.atualizarTabela();
+                    this.carregarProdutosSelect(); // CORREÇÃO: Atualizar select após mudança de estoque
+                }
+            }
+            
+            static atualizarTabela() {
+                const tbody = document.querySelector('#produtos-table tbody');
+                const searchTerm = document.getElementById('searchProdutos').value.toLowerCase();
+                const categoriaFilter = document.getElementById('filterCategoria').value;
+                const estoqueFilter = document.getElementById('filterEstoque').value;
+                
+                let produtosFiltrados = this.produtos.filter(produto => {
+                    const matchSearch = produto.nome.toLowerCase().includes(searchTerm) ||
+                                      produto.codigo.toLowerCase().includes(searchTerm);
+                    const matchCategoria = !categoriaFilter || produto.categoria === categoriaFilter;
+                    let matchEstoque = true;
+                    
+                    if (estoqueFilter === 'baixo') matchEstoque = produto.estoque <= 5;
+                    else if (estoqueFilter === 'medio') matchEstoque = produto.estoque > 5 && produto.estoque <= 20;
+                    else if (estoqueFilter === 'alto') matchEstoque = produto.estoque > 20;
+                    
+                    return matchSearch && matchCategoria && matchEstoque;
+                });
+                
+                if (produtosFiltrados.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nenhum produto encontrado</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = produtosFiltrados.map(produto => `
+                    <tr>
+                        <td>${produto.nome}</td>
+                        <td>${Utils.formatarMoeda(produto.preco)}</td>
+                        <td>
+                            <span class="badge ${produto.estoque <= 5 ? 'bg-danger' : produto.estoque <= 20 ? 'bg-warning' : 'bg-success'}">
+                                ${produto.estoque}
+                            </span>
+                        </td>
+                        <td>${produto.categoria || '-'}</td>
+                        <td>${produto.codigo}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="ProdutoManager.editarProdutoModal('${produto.id}')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="ProdutoManager.excluirProduto('${produto.id}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            static editarProdutoModal(id) {
+                const produto = this.produtos.find(p => p.id === id);
+                if (produto) {
+                    document.getElementById('produto-id').value = produto.id;
+                    document.getElementById('produto-nome').value = produto.nome;
+                    document.getElementById('produto-preco').value = produto.preco;
+                    document.getElementById('produto-estoque').value = produto.estoque;
+                    document.getElementById('produto-categoria').value = produto.categoria || '';
+                    document.getElementById('produto-codigo').value = produto.codigo;
+                    document.getElementById('produto-descricao').value = produto.descricao || '';
+                    
+                    document.getElementById('produtoModalTitle').innerHTML = '<i class="bi bi-pencil"></i> Editar Produto';
+                    new bootstrap.Modal(document.getElementById('produtoModal')).show();
+                }
+            }
+            
+            static atualizarCategorias() {
+                const categorias = [...new Set(this.produtos.map(p => p.categoria).filter(c => c))];
+                const filterCategoria = document.getElementById('filterCategoria');
+                const categoriasDatalist = document.getElementById('categorias-list');
+                
+                // Atualizar filtro
+                filterCategoria.innerHTML = '<option value="">Todas as categorias</option>' +
+                    categorias.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+                
+                // Atualizar datalist
+                categoriasDatalist.innerHTML = categorias.map(cat => `<option value="${cat}"></option>`).join('');
+            }
+            
+            // CORREÇÃO: Função melhorada para carregar produtos no select
+            static carregarProdutosSelect() {
+                const select = document.getElementById('produto-select');
+                if (!select) return; // Se o elemento não existir, sair da função
+                
+                // Filtrar apenas produtos com estoque disponível
+                const produtosDisponiveis = this.produtos.filter(p => p.estoque > 0);
+                
+                select.innerHTML = '<option value="">Selecione um produto</option>' +
+                    produtosDisponiveis.map(produto => 
+                        `<option value="${produto.id}">${produto.nome} - ${Utils.formatarMoeda(produto.preco)} (Estoque: ${produto.estoque})</option>`
+                    ).join('');
+                
+                console.log('Produtos carregados no select:', produtosDisponiveis.length); // Debug
+            }
+        }
+
+        // Gerenciador de Clientes
+        class ClienteManager {
+            static clientes = StorageManager.carregar('clientes');
+            
+            static salvarClientes() {
+                StorageManager.salvar('clientes', this.clientes);
+            }
+            
+            static adicionarCliente(cliente) {
+                cliente.id = Utils.gerarId();
+                cliente.dataCadastro = new Date().toISOString();
+                this.clientes.push(cliente);
+                this.salvarClientes();
+                this.atualizarTabela();
+                this.carregarClientesSelect(); // CORREÇÃO: Atualizar select de clientes
+                Utils.mostrarToast('Cliente cadastrado com sucesso!');
+            }
+            
+            static editarCliente(id, clienteAtualizado) {
+                const index = this.clientes.findIndex(c => c.id === id);
+                if (index !== -1) {
+                    this.clientes[index] = { ...this.clientes[index], ...clienteAtualizado };
+                    this.salvarClientes();
+                    this.atualizarTabela();
+                    this.carregarClientesSelect(); // CORREÇÃO: Atualizar select de clientes
+                    Utils.mostrarToast('Cliente atualizado com sucesso!');
+                }
+            }
+            
+            static excluirCliente(id) {
+                if (confirm('Tem certeza que deseja excluir este cliente?')) {
+                    this.clientes = this.clientes.filter(c => c.id !== id);
+                    this.salvarClientes();
+                    this.atualizarTabela();
+                    this.carregarClientesSelect(); // CORREÇÃO: Atualizar select de clientes
+                    Utils.mostrarToast('Cliente excluído com sucesso!');
+                }
+            }
+            
+            static atualizarTabela() {
+                const tbody = document.querySelector('#clientes-table tbody');
+                const searchTerm = document.getElementById('searchClientes').value.toLowerCase();
+                const tipoFilter = document.getElementById('filterTipoCliente').value;
+                
+                let clientesFiltrados = this.clientes.filter(cliente => {
+                    const matchSearch = cliente.nome.toLowerCase().includes(searchTerm) ||
+                                      cliente.documento.includes(searchTerm) ||
+                                      (cliente.email && cliente.email.toLowerCase().includes(searchTerm));
+                    const matchTipo = !tipoFilter || cliente.tipo === tipoFilter;
+                    
+                    return matchSearch && matchTipo;
+                });
+                
+                if (clientesFiltrados.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nenhum cliente encontrado</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = clientesFiltrados.map(cliente => `
+                    <tr>
+                        <td>${cliente.nome}</td>
+                        <td>${cliente.documento}</td>
+                        <td>${cliente.telefone || '-'}</td>
+                        <td>${cliente.email || '-'}</td>
+                        <td>
+                            <span class="badge ${cliente.tipo === 'pessoa_fisica' ? 'bg-primary' : 'bg-success'}">
+                                ${cliente.tipo === 'pessoa_fisica' ? 'Pessoa Física' : 'Pessoa Jurídica'}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="ClienteManager.editarClienteModal('${cliente.id}')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="ClienteManager.excluirCliente('${cliente.id}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            static editarClienteModal(id) {
+                const cliente = this.clientes.find(c => c.id === id);
+                if (cliente) {
+                    document.getElementById('cliente-id').value = cliente.id;
+                    document.getElementById('cliente-nome').value = cliente.nome;
+                    document.getElementById('cliente-tipo').value = cliente.tipo;
+                    document.getElementById('cliente-documento').value = cliente.documento;
+                    document.getElementById('cliente-telefone').value = cliente.telefone || '';
+                    document.getElementById('cliente-email').value = cliente.email || '';
+                    document.getElementById('cliente-endereco').value = cliente.endereco || '';
+                    document.getElementById('cliente-observacoes').value = cliente.observacoes || '';
+                    
+                    document.getElementById('clienteModalTitle').innerHTML = '<i class="bi bi-pencil"></i> Editar Cliente';
+                    new bootstrap.Modal(document.getElementById('clienteModal')).show();
+                }
+            }
+            
+            // CORREÇÃO: Função melhorada para carregar clientes no select
+            static carregarClientesSelect() {
+                const select = document.getElementById('venda-cliente');
+                if (!select) return; // Se o elemento não existir, sair da função
+                
+                select.innerHTML = '<option value="">Selecione um cliente</option>' +
+                    this.clientes.map(cliente => 
+                        `<option value="${cliente.id}">${cliente.nome}</option>`
+                    ).join('');
+                
+                console.log('Clientes carregados no select:', this.clientes.length); // Debug
+            }
+        }
+
+        // Gerenciador de Vendas
+        class VendaManager {
+            static vendas = StorageManager.carregar('vendas');
+            static produtosVenda = [];
+            
+            static salvarVendas() {
+                StorageManager.salvar('vendas', this.vendas);
+            }
+            
+            static adicionarProdutoVenda() {
+                const produtoId = document.getElementById('produto-select').value;
+                const quantidade = parseInt(document.getElementById('produto-quantidade').value);
+                
+                if (!produtoId || !quantidade || quantidade <= 0) {
+                    Utils.mostrarToast('Selecione um produto e informe a quantidade', 'danger');
+                    return;
+                }
+                
+                const produto = ProdutoManager.produtos.find(p => p.id === produtoId);
+                if (!produto) {
+                    Utils.mostrarToast('Produto não encontrado', 'danger');
+                    return;
+                }
+                
+                if (quantidade > produto.estoque) {
+                    Utils.mostrarToast('Quantidade maior que o estoque disponível', 'danger');
+                    return;
+                }
+                
+                // Verificar se o produto já foi adicionado
+                const produtoExistente = this.produtosVenda.find(p => p.id === produtoId);
+                if (produtoExistente) {
+                    produtoExistente.quantidade += quantidade;
+                    produtoExistente.subtotal = produtoExistente.quantidade * produtoExistente.preco;
+                } else {
+                    this.produtosVenda.push({
+                        id: produtoId,
+                        nome: produto.nome,
+                        preco: produto.preco,
+                        quantidade: quantidade,
+                        subtotal: produto.preco * quantidade
+                    });
+                }
+                
+                this.atualizarTabelaProdutosVenda();
+                this.calcularTotal();
+                
+                // Limpar campos
+                document.getElementById('produto-select').value = '';
+                document.getElementById('produto-quantidade').value = '';
+            }
+            
+            static removerProdutoVenda(index) {
+                this.produtosVenda.splice(index, 1);
+                this.atualizarTabelaProdutosVenda();
+                this.calcularTotal();
+            }
+            
+            static atualizarTabelaProdutosVenda() {
+                const tbody = document.querySelector('#produtos-venda-table tbody');
+                
+                if (this.produtosVenda.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhum produto adicionado</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = this.produtosVenda.map((produto, index) => `
+                    <tr>
+                        <td>${produto.nome}</td>
+                        <td>${Utils.formatarMoeda(produto.preco)}</td>
+                        <td>${produto.quantidade}</td>
+                        <td>${Utils.formatarMoeda(produto.subtotal)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="VendaManager.removerProdutoVenda(${index})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            static calcularTotal() {
+                const subtotal = this.produtosVenda.reduce((total, produto) => total + produto.subtotal, 0);
+                const desconto = parseFloat(document.getElementById('venda-desconto').value) || 0;
+                const total = subtotal - desconto;
+                
+                document.getElementById('venda-total').value = Utils.formatarMoeda(total);
+            }
+            
+            static registrarVenda(dadosVenda) {
+                if (this.produtosVenda.length === 0) {
+                    Utils.mostrarToast('Adicione pelo menos um produto à venda', 'danger');
+                    return;
+                }
+                
+                const venda = {
+                    id: Utils.gerarId(),
+                    ...dadosVenda,
+                    produtos: [...this.produtosVenda],
+                    subtotal: this.produtosVenda.reduce((total, produto) => total + produto.subtotal, 0),
+                    total: this.produtosVenda.reduce((total, produto) => total + produto.subtotal, 0) - (dadosVenda.desconto || 0),
+                    dataVenda: dadosVenda.dataVenda || new Date().toISOString(),
+                    status: 'pago'
+                };
+                
+                // Atualizar estoque dos produtos
+                this.produtosVenda.forEach(produto => {
+                    ProdutoManager.atualizarEstoque(produto.id, produto.quantidade);
+                });
+                
+                // Registrar entrada no caixa
+                CaixaManager.registrarEntrada({
+                    valor: venda.total,
+                    descricao: `Venda #${venda.id.slice(-6)} - ${venda.cliente ? ClienteManager.clientes.find(c => c.id === venda.cliente)?.nome || 'Cliente não identificado' : 'Venda avulsa'}`,
+                    data: venda.dataVenda,
+                    origem: 'venda',
+                    vendaId: venda.id
+                });
+                
+                this.vendas.push(venda);
+                this.salvarVendas();
+                this.atualizarTabela();
+                
+                // Limpar formulário
+                this.produtosVenda = [];
+                this.atualizarTabelaProdutosVenda();
+                
+                Utils.mostrarToast('Venda registrada com sucesso!');
+                bootstrap.Modal.getInstance(document.getElementById('vendaModal')).hide();
+            }
+            
+            static atualizarTabela() {
+                const tbody = document.querySelector('#vendas-table tbody');
+                const searchTerm = document.getElementById('searchVendas').value.toLowerCase();
+                const dataInicio = document.getElementById('filterDataInicio').value;
+                const dataFim = document.getElementById('filterDataFim').value;
+                const statusFilter = document.getElementById('filterStatusVenda').value;
+                
+                let vendasFiltradas = this.vendas.filter(venda => {
+                    const cliente = venda.cliente ? ClienteManager.clientes.find(c => c.id === venda.cliente) : null;
+                    const nomeCliente = cliente ? cliente.nome : 'Venda avulsa';
+                    
+                    const matchSearch = nomeCliente.toLowerCase().includes(searchTerm) ||
+                                      venda.id.toLowerCase().includes(searchTerm);
+                    
+                    const dataVenda = new Date(venda.dataVenda).toISOString().split('T')[0];
+                    const matchDataInicio = !dataInicio || dataVenda >= dataInicio;
+                    const matchDataFim = !dataFim || dataVenda <= dataFim;
+                    const matchStatus = !statusFilter || venda.status === statusFilter;
+                    
+                    return matchSearch && matchDataInicio && matchDataFim && matchStatus;
+                });
+                
+                // Ordenar por data (mais recente primeiro)
+                vendasFiltradas.sort((a, b) => new Date(b.dataVenda) - new Date(a.dataVenda));
+                
+                if (vendasFiltradas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nenhuma venda encontrada</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = vendasFiltradas.map(venda => {
+                    const cliente = venda.cliente ? ClienteManager.clientes.find(c => c.id === venda.cliente) : null;
+                    const nomeCliente = cliente ? cliente.nome : 'Venda avulsa';
+                    
+                    return `
+                        <tr>
+                            <td>${Utils.formatarDataHora(venda.dataVenda)}</td>
+                            <td>${nomeCliente}</td>
+                            <td>${Utils.formatarMoeda(venda.total)}</td>
+                            <td>
+                                <span class="badge bg-info">
+                                    ${venda.formaPagamento.charAt(0).toUpperCase() + venda.formaPagamento.slice(1)}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge ${venda.status === 'pago' ? 'bg-success' : venda.status === 'pendente' ? 'bg-warning' : 'bg-danger'}">
+                                    ${venda.status.charAt(0).toUpperCase() + venda.status.slice(1)}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-info me-1" onclick="VendaManager.visualizarVenda('${venda.id}')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="VendaManager.cancelarVenda('${venda.id}')">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            
+            static visualizarVenda(id) {
+                const venda = this.vendas.find(v => v.id === id);
+                if (venda) {
+                    const cliente = venda.cliente ? ClienteManager.clientes.find(c => c.id === venda.cliente) : null;
+                    const nomeCliente = cliente ? cliente.nome : 'Venda avulsa';
+                    
+                    const detalhes = `
+                        <strong>Venda #${venda.id.slice(-6)}</strong><br>
+                        <strong>Data:</strong> ${Utils.formatarDataHora(venda.dataVenda)}<br>
+                        <strong>Cliente:</strong> ${nomeCliente}<br>
+                        <strong>Forma de Pagamento:</strong> ${venda.formaPagamento}<br>
+                        <strong>Status:</strong> ${venda.status}<br><br>
+                        <strong>Produtos:</strong><br>
+                        ${venda.produtos.map(p => `• ${p.nome} - Qtd: ${p.quantidade} - ${Utils.formatarMoeda(p.subtotal)}`).join('<br>')}
+                        <br><br>
+                        <strong>Subtotal:</strong> ${Utils.formatarMoeda(venda.subtotal)}<br>
+                        <strong>Desconto:</strong> ${Utils.formatarMoeda(venda.desconto || 0)}<br>
+                        <strong>Total:</strong> ${Utils.formatarMoeda(venda.total)}
+                    `;
+                    
+                    alert(detalhes);
+                }
+            }
+            
+            static cancelarVenda(id) {
+                if (confirm('Tem certeza que deseja cancelar esta venda? O estoque será restaurado.')) {
+                    const venda = this.vendas.find(v => v.id === id);
+                    if (venda && venda.status !== 'cancelado') {
+                        // Restaurar estoque
+                        venda.produtos.forEach(produto => {
+                            const produtoOriginal = ProdutoManager.produtos.find(p => p.id === produto.id);
+                            if (produtoOriginal) {
+                                produtoOriginal.estoque += produto.quantidade;
+                            }
+                        });
+                        
+                        // Registrar saída no caixa
+                        CaixaManager.registrarSaida({
+                            valor: venda.total,
+                            descricao: `Cancelamento da Venda #${venda.id.slice(-6)}`,
+                            data: new Date().toISOString(),
+                            origem: 'cancelamento_venda',
+                            vendaId: venda.id
+                        });
+                        
+                        venda.status = 'cancelado';
+                        this.salvarVendas();
+                        ProdutoManager.salvarProdutos();
+                        this.atualizarTabela();
+                        ProdutoManager.atualizarTabela();
+                        ProdutoManager.carregarProdutosSelect(); // CORREÇÃO: Atualizar select após cancelamento
+                        
+                        Utils.mostrarToast('Venda cancelada com sucesso!');
+                    }
+                }
+            }
+        }
+
+        // Gerenciador de Caixa
+        class CaixaManager {
+            static movimentacoes = StorageManager.carregar('caixa');
+            
+            static salvarMovimentacoes() {
+                StorageManager.salvar('caixa', this.movimentacoes);
+            }
+            
+            static registrarEntrada(dados) {
+                const entrada = {
+                    id: Utils.gerarId(),
+                    tipo: 'entrada',
+                    ...dados,
+                    data: dados.data || new Date().toISOString()
+                };
+                
+                this.movimentacoes.push(entrada);
+                this.salvarMovimentacoes();
+                this.atualizarTabela();
+                this.atualizarCards();
+            }
+            
+            static registrarSaida(dados) {
+                const saida = {
+                    id: Utils.gerarId(),
+                    tipo: 'saida',
+                    ...dados,
+                    data: dados.data || new Date().toISOString()
+                };
+                
+                this.movimentacoes.push(saida);
+                this.salvarMovimentacoes();
+                this.atualizarTabela();
+                this.atualizarCards();
+            }
+            
+            static calcularSaldo() {
+                return this.movimentacoes.reduce((saldo, mov) => {
+                    return mov.tipo === 'entrada' ? saldo + mov.valor : saldo - mov.valor;
+                }, 0);
+            }
+            
+            static calcularEntradasHoje() {
+                const hoje = new Date().toISOString().split('T')[0];
+                return this.movimentacoes
+                    .filter(mov => mov.tipo === 'entrada' && mov.data.split('T')[0] === hoje)
+                    .reduce((total, mov) => total + mov.valor, 0);
+            }
+            
+            static calcularSaidasHoje() {
+                const hoje = new Date().toISOString().split('T')[0];
+                return this.movimentacoes
+                    .filter(mov => mov.tipo === 'saida' && mov.data.split('T')[0] === hoje)
+                    .reduce((total, mov) => total + mov.valor, 0);
+            }
+            
+            static atualizarCards() {
+                document.getElementById('saldo-atual').textContent = Utils.formatarMoeda(this.calcularSaldo());
+                document.getElementById('entradas-hoje').textContent = Utils.formatarMoeda(this.calcularEntradasHoje());
+                document.getElementById('saidas-hoje').textContent = Utils.formatarMoeda(this.calcularSaidasHoje());
+            }
+            
+            static atualizarTabela() {
+                const tbody = document.querySelector('#caixa-table tbody');
+                const searchTerm = document.getElementById('searchCaixa').value.toLowerCase();
+                const dataInicio = document.getElementById('filterDataCaixaInicio').value;
+                const dataFim = document.getElementById('filterDataCaixaFim').value;
+                const tipoFilter = document.getElementById('filterTipoCaixa').value;
+                
+                let movimentacoesFiltradas = this.movimentacoes.filter(mov => {
+                    const matchSearch = mov.descricao.toLowerCase().includes(searchTerm);
+                    
+                    const dataMovimentacao = new Date(mov.data).toISOString().split('T')[0];
+                    const matchDataInicio = !dataInicio || dataMovimentacao >= dataInicio;
+                    const matchDataFim = !dataFim || dataMovimentacao <= dataFim;
+                    const matchTipo = !tipoFilter || mov.tipo === tipoFilter;
+                    
+                    return matchSearch && matchDataInicio && matchDataFim && matchTipo;
+                });
+                
+                // Ordenar por data (mais recente primeiro)
+                movimentacoesFiltradas.sort((a, b) => new Date(b.data) - new Date(a.data));
+                
+                if (movimentacoesFiltradas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nenhuma movimentação encontrada</td></tr>';
+                    return;
+                }
+                
+                let saldoAcumulado = this.calcularSaldo();
+                tbody.innerHTML = movimentacoesFiltradas.map(mov => {
+                    const saldoAnterior = saldoAcumulado;
+                    if (mov.tipo === 'entrada') {
+                        saldoAcumulado -= mov.valor;
+                    } else {
+                        saldoAcumulado += mov.valor;
+                    }
+                    
+                    return `
+                        <tr>
+                            <td>${Utils.formatarDataHora(mov.data)}</td>
+                            <td>
+                                <span class="badge ${mov.tipo === 'entrada' ? 'bg-success' : 'bg-danger'}">
+                                    ${mov.tipo === 'entrada' ? 'Entrada' : 'Saída'}
+                                </span>
+                            </td>
+                            <td>${mov.descricao}</td>
+                            <td class="${mov.tipo === 'entrada' ? 'text-success' : 'text-danger'}">
+                                ${mov.tipo === 'entrada' ? '+' : '-'} ${Utils.formatarMoeda(mov.valor)}
+                            </td>
+                            <td>${Utils.formatarMoeda(saldoAnterior)}</td>
+                            <td>
+                                ${!mov.origem || mov.origem === 'manual' ? `
+                                    <button class="btn btn-sm btn-outline-danger" onclick="CaixaManager.excluirMovimentacao('${mov.id}')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                ` : '<span class="text-muted">Automático</span>'}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            
+            static excluirMovimentacao(id) {
+                if (confirm('Tem certeza que deseja excluir esta movimentação?')) {
+                    this.movimentacoes = this.movimentacoes.filter(m => m.id !== id);
+                    this.salvarMovimentacoes();
+                    this.atualizarTabela();
+                    this.atualizarCards();
+                    Utils.mostrarToast('Movimentação excluída com sucesso!');
+                }
+            }
+        }
+
+        // Gerenciador do Dashboard
+        class DashboardManager {
+            static atualizarDashboard() {
+                this.atualizarVendasHoje();
+                this.atualizarTotalCaixa();
+                this.atualizarTotalProdutos();
+                this.atualizarTotalClientes();
+                this.atualizarVendasRecentes();
+                this.atualizarEstoqueBaixo();
+            }
+            
+            static atualizarVendasHoje() {
+                const hoje = new Date().toISOString().split('T')[0];
+                const vendasHoje = VendaManager.vendas
+                    .filter(venda => venda.dataVenda.split('T')[0] === hoje && venda.status === 'pago')
+                    .reduce((total, venda) => total + venda.total, 0);
+                
+                document.getElementById('vendas-hoje').textContent = Utils.formatarMoeda(vendasHoje);
+            }
+            
+            static atualizarTotalCaixa() {
+                document.getElementById('total-caixa').textContent = Utils.formatarMoeda(CaixaManager.calcularSaldo());
+            }
+            
+            static atualizarTotalProdutos() {
+                const totalProdutos = ProdutoManager.produtos.reduce((total, produto) => total + produto.estoque, 0);
+                document.getElementById('total-produtos').textContent = totalProdutos;
+            }
+            
+            static atualizarTotalClientes() {
+                document.getElementById('total-clientes').textContent = ClienteManager.clientes.length;
+            }
+            
+            static atualizarVendasRecentes() {
+                const tbody = document.querySelector('#vendas-recentes-table tbody');
+                const vendasRecentes = VendaManager.vendas
+                    .filter(venda => venda.status === 'pago')
+                    .sort((a, b) => new Date(b.dataVenda) - new Date(a.dataVenda))
+                    .slice(0, 5);
+                
+                if (vendasRecentes.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Nenhuma venda registrada</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = vendasRecentes.map(venda => {
+                    const cliente = venda.cliente ? ClienteManager.clientes.find(c => c.id === venda.cliente) : null;
+                    const nomeCliente = cliente ? cliente.nome : 'Venda avulsa';
+                    
+                    return `
+                        <tr>
+                            <td>${Utils.formatarData(venda.dataVenda)}</td>
+                            <td>${nomeCliente}</td>
+                            <td>${Utils.formatarMoeda(venda.total)}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            
+            static atualizarEstoqueBaixo() {
+                const tbody = document.querySelector('#estoque-baixo-table tbody');
+                const produtosBaixoEstoque = ProdutoManager.produtos.filter(produto => produto.estoque <= 5);
+                
+                if (produtosBaixoEstoque.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="2" class="text-center text-muted">Todos os produtos com estoque adequado</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = produtosBaixoEstoque.map(produto => `
+                    <tr>
+                        <td>${produto.nome}</td>
+                        <td>
+                            <span class="badge bg-danger">${produto.estoque}</span>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // Gerenciador de Relatórios
+        class RelatoriosManager {
+            static gerarRelatorios() {
+                this.atualizarResumo();
+                this.gerarVendasPorPeriodo();
+                this.gerarProdutosMaisVendidos();
+                this.gerarFormasPagamento();
+                this.gerarClientesMaisAtivos();
+            }
+            
+            static filtrarPorPeriodo() {
+                const periodo = document.getElementById('relatorio-periodo').value;
+                const hoje = new Date();
+                let dataInicio, dataFim;
+                
+                switch (periodo) {
+                    case 'hoje':
+                        dataInicio = dataFim = hoje.toISOString().split('T')[0];
+                        break;
+                    case 'semana':
+                        const inicioSemana = new Date(hoje);
+                        inicioSemana.setDate(hoje.getDate() - hoje.getDay());
+                        dataInicio = inicioSemana.toISOString().split('T')[0];
+                        dataFim = hoje.toISOString().split('T')[0];
+                        break;
+                    case 'mes':
+                        dataInicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0];
+                        dataFim = hoje.toISOString().split('T')[0];
+                        break;
+                    case 'ano':
+                        dataInicio = new Date(hoje.getFullYear(), 0, 1).toISOString().split('T')[0];
+                        dataFim = hoje.toISOString().split('T')[0];
+                        break;
+                    default:
+                        dataInicio = document.getElementById('relatorio-data-inicio').value;
+                        dataFim = document.getElementById('relatorio-data-fim').value;
+                }
+                
+                if (dataInicio) document.getElementById('relatorio-data-inicio').value = dataInicio;
+                if (dataFim) document.getElementById('relatorio-data-fim').value = dataFim;
+                
+                this.gerarRelatorios();
+            }
+            
+            static obterVendasFiltradas() {
+                const dataInicio = document.getElementById('relatorio-data-inicio').value;
+                const dataFim = document.getElementById('relatorio-data-fim').value;
+                
+                return VendaManager.vendas.filter(venda => {
+                    if (venda.status !== 'pago') return false;
+                    
+                    const dataVenda = venda.dataVenda.split('T')[0];
+                    const matchDataInicio = !dataInicio || dataVenda >= dataInicio;
+                    const matchDataFim = !dataFim || dataVenda <= dataFim;
+                    
+                    return matchDataInicio && matchDataFim;
+                });
+            }
+            
+            static atualizarResumo() {
+                const vendas = this.obterVendasFiltradas();
+                const totalVendas = vendas.reduce((total, venda) => total + venda.total, 0);
+                const numVendas = vendas.length;
+                const ticketMedio = numVendas > 0 ? totalVendas / numVendas : 0;
+                const produtosVendidos = vendas.reduce((total, venda) => 
+                    total + venda.produtos.reduce((subtotal, produto) => subtotal + produto.quantidade, 0), 0);
+                
+                document.getElementById('relatorio-total-vendas').textContent = Utils.formatarMoeda(totalVendas);
+                document.getElementById('relatorio-num-vendas').textContent = numVendas;
+                document.getElementById('relatorio-ticket-medio').textContent = Utils.formatarMoeda(ticketMedio);
+                document.getElementById('relatorio-produtos-vendidos').textContent = produtosVendidos;
+            }
+            
+            static gerarVendasPorPeriodo() {
+                const vendas = this.obterVendasFiltradas();
+                const vendasPorData = {};
+                
+                vendas.forEach(venda => {
+                    const data = venda.dataVenda.split('T')[0];
+                    if (!vendasPorData[data]) {
+                        vendasPorData[data] = { vendas: 0, total: 0 };
+                    }
+                    vendasPorData[data].vendas++;
+                    vendasPorData[data].total += venda.total;
+                });
+                
+                const tbody = document.querySelector('#relatorio-vendas-periodo tbody');
+                const dados = Object.entries(vendasPorData)
+                    .sort(([a], [b]) => b.localeCompare(a))
+                    .slice(0, 10);
+                
+                if (dados.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Nenhum dado disponível</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = dados.map(([data, info]) => `
+                    <tr>
+                        <td>${Utils.formatarData(data)}</td>
+                        <td>${info.vendas}</td>
+                        <td>${Utils.formatarMoeda(info.total)}</td>
+                    </tr>
+                `).join('');
+            }
+            
+            static gerarProdutosMaisVendidos() {
+                const vendas = this.obterVendasFiltradas();
+                const produtosVendidos = {};
+                
+                vendas.forEach(venda => {
+                    venda.produtos.forEach(produto => {
+                        if (!produtosVendidos[produto.id]) {
+                            produtosVendidos[produto.id] = {
+                                nome: produto.nome,
+                                quantidade: 0,
+                                total: 0
+                            };
+                        }
+                        produtosVendidos[produto.id].quantidade += produto.quantidade;
+                        produtosVendidos[produto.id].total += produto.subtotal;
+                    });
+                });
+                
+                const tbody = document.querySelector('#relatorio-produtos-mais-vendidos tbody');
+                const dados = Object.values(produtosVendidos)
+                    .sort((a, b) => b.quantidade - a.quantidade)
+                    .slice(0, 10);
+                
+                if (dados.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Nenhum dado disponível</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = dados.map(produto => `
+                    <tr>
+                        <td>${produto.nome}</td>
+                        <td>${produto.quantidade}</td>
+                        <td>${Utils.formatarMoeda(produto.total)}</td>
+                    </tr>
+                `).join('');
+            }
+            
+            static gerarFormasPagamento() {
+                const vendas = this.obterVendasFiltradas();
+                const formasPagamento = {};
+                
+                vendas.forEach(venda => {
+                    const forma = venda.formaPagamento;
+                    if (!formasPagamento[forma]) {
+                        formasPagamento[forma] = { vendas: 0, total: 0 };
+                    }
+                    formasPagamento[forma].vendas++;
+                    formasPagamento[forma].total += venda.total;
+                });
+                
+                const tbody = document.querySelector('#relatorio-formas-pagamento tbody');
+                const dados = Object.entries(formasPagamento)
+                    .sort(([,a], [,b]) => b.total - a.total);
+                
+                if (dados.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Nenhum dado disponível</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = dados.map(([forma, info]) => `
+                    <tr>
+                        <td>${forma.charAt(0).toUpperCase() + forma.slice(1)}</td>
+                        <td>${info.vendas}</td>
+                        <td>${Utils.formatarMoeda(info.total)}</td>
+                    </tr>
+                `).join('');
+            }
+            
+            static gerarClientesMaisAtivos() {
+                const vendas = this.obterVendasFiltradas();
+                const clientesAtivos = {};
+                
+                vendas.forEach(venda => {
+                    if (venda.cliente) {
+                        if (!clientesAtivos[venda.cliente]) {
+                            const cliente = ClienteManager.clientes.find(c => c.id === venda.cliente);
+                            clientesAtivos[venda.cliente] = {
+                                nome: cliente ? cliente.nome : 'Cliente não encontrado',
+                                compras: 0,
+                                total: 0
+                            };
+                        }
+                        clientesAtivos[venda.cliente].compras++;
+                        clientesAtivos[venda.cliente].total += venda.total;
+                    }
+                });
+                
+                const tbody = document.querySelector('#relatorio-clientes-mais-ativos tbody');
+                const dados = Object.values(clientesAtivos)
+                    .sort((a, b) => b.total - a.total)
+                    .slice(0, 10);
+                
+                if (dados.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Nenhum dado disponível</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = dados.map(cliente => `
+                    <tr>
+                        <td>${cliente.nome}</td>
+                        <td>${cliente.compras}</td>
+                        <td>${Utils.formatarMoeda(cliente.total)}</td>
+                    </tr>
+                `).join('');
+            }
+            
+            static exportarRelatorio(tipo) {
+                let dados = [];
+                let nomeArquivo = '';
+                
+                switch (tipo) {
+                    case 'vendas-periodo':
+                        const tbody1 = document.querySelector('#relatorio-vendas-periodo tbody');
+                        dados = Array.from(tbody1.querySelectorAll('tr')).map(tr => {
+                            const cells = tr.querySelectorAll('td');
+                            return cells.length > 1 ? {
+                                Data: cells[0].textContent,
+                                Vendas: cells[1].textContent,
+                                Total: cells[2].textContent
+                            } : null;
+                        }).filter(item => item);
+                        nomeArquivo = 'vendas-por-periodo';
+                        break;
+                    case 'produtos-mais-vendidos':
+                        const tbody2 = document.querySelector('#relatorio-produtos-mais-vendidos tbody');
+                        dados = Array.from(tbody2.querySelectorAll('tr')).map(tr => {
+                            const cells = tr.querySelectorAll('td');
+                            return cells.length > 1 ? {
+                                Produto: cells[0].textContent,
+                                'Qtd Vendida': cells[1].textContent,
+                                Total: cells[2].textContent
+                            } : null;
+                        }).filter(item => item);
+                        nomeArquivo = 'produtos-mais-vendidos';
+                        break;
+                    case 'formas-pagamento':
+                        const tbody3 = document.querySelector('#relatorio-formas-pagamento tbody');
+                        dados = Array.from(tbody3.querySelectorAll('tr')).map(tr => {
+                            const cells = tr.querySelectorAll('td');
+                            return cells.length > 1 ? {
+                                'Forma de Pagamento': cells[0].textContent,
+                                Vendas: cells[1].textContent,
+                                Total: cells[2].textContent
+                            } : null;
+                        }).filter(item => item);
+                        nomeArquivo = 'formas-pagamento';
+                        break;
+                    case 'clientes-mais-ativos':
+                        const tbody4 = document.querySelector('#relatorio-clientes-mais-ativos tbody');
+                        dados = Array.from(tbody4.querySelectorAll('tr')).map(tr => {
+                            const cells = tr.querySelectorAll('td');
+                            return cells.length > 1 ? {
+                                Cliente: cells[0].textContent,
+                                Compras: cells[1].textContent,
+                                'Total Gasto': cells[2].textContent
+                            } : null;
+                        }).filter(item => item);
+                        nomeArquivo = 'clientes-mais-ativos';
+                        break;
+                }
+                
+                if (dados.length === 0) {
+                    Utils.mostrarToast('Nenhum dado disponível para exportar', 'warning');
+                    return;
+                }
+                
+                const csv = this.converterParaCSV(dados);
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${nomeArquivo}-${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                Utils.mostrarToast('Relatório exportado com sucesso!');
+            }
+            
+            static converterParaCSV(dados) {
+                if (dados.length === 0) return '';
+                
+                const headers = Object.keys(dados[0]);
+                const csvContent = [
+                    headers.join(','),
+                    ...dados.map(row => headers.map(header => `"${row[header]}"`).join(','))
+                ].join('\n');
+                
+                return csvContent;
+            }
+        }
+
+        // Gerenciador de Interface
+        class InterfaceManager {
+            static init() {
+                this.configurarSidebar();
+                this.configurarNavegacao();
+                this.configurarFormularios();
+                this.configurarFiltros();
+                this.configurarExportImport();
+                this.carregarDados();
+            }
+            
+            static configurarSidebar() {
+                const sidebar = document.getElementById('sidebar');
+                const sidebarToggle = document.getElementById('sidebarToggle');
+                const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+                const sidebarOverlay = document.getElementById('sidebarOverlay');
+                
+                // Toggle desktop
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('collapsed');
+                    const icon = sidebarToggle.querySelector('i');
+                    icon.className = sidebar.classList.contains('collapsed') ? 'bi bi-chevron-right' : 'bi bi-chevron-left';
+                });
+                
+                // Toggle mobile
+                mobileMenuToggle.addEventListener('click', () => {
+                    sidebar.classList.add('show');
+                    sidebarOverlay.classList.add('show');
+                });
+                
+                // Fechar mobile
+                sidebarOverlay.addEventListener('click', () => {
+                    sidebar.classList.remove('show');
+                    sidebarOverlay.classList.remove('show');
+                });
+            }
+            
+            static configurarNavegacao() {
+                const navLinks = document.querySelectorAll('.nav-link[data-section]');
+                const sections = document.querySelectorAll('.section');
+                
+                navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        
+                        // Remover classe active de todos os links
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        // Adicionar classe active ao link clicado
+                        link.classList.add('active');
+                        
+                        // Esconder todas as seções
+                        sections.forEach(section => section.classList.remove('active'));
+                        // Mostrar seção correspondente
+                        const targetSection = document.getElementById(link.dataset.section);
+                        if (targetSection) {
+                            targetSection.classList.add('active');
+                        }
+                        
+                        // CORREÇÃO: Recarregar selects quando entrar na seção de vendas
+                        if (link.dataset.section === 'vendas') {
+                            setTimeout(() => {
+                                ProdutoManager.carregarProdutosSelect();
+                                ClienteManager.carregarClientesSelect();
+                            }, 100);
+                        }
+                        
+                        // Fechar sidebar mobile
+                        const sidebar = document.getElementById('sidebar');
+                        const sidebarOverlay = document.getElementById('sidebarOverlay');
+                        sidebar.classList.
+
+
+remove('show');
+                        sidebarOverlay.classList.remove('show');
+                    });
+                });
+            }
+            
+            static configurarFormularios() {
+                // Formulário de Produto
+                document.getElementById('form-produto').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const produto = {
+                        nome: document.getElementById('produto-nome').value,
+                        preco: parseFloat(document.getElementById('produto-preco').value),
+                        estoque: parseInt(document.getElementById('produto-estoque').value),
+                        categoria: document.getElementById('produto-categoria').value,
+                        codigo: document.getElementById('produto-codigo').value,
+                        descricao: document.getElementById('produto-descricao').value
+                    };
+                    
+                    const id = document.getElementById('produto-id').value;
+                    if (id) {
+                        ProdutoManager.editarProduto(id, produto);
+                    } else {
+                        ProdutoManager.adicionarProduto(produto);
+                    }
+                    
+                    bootstrap.Modal.getInstance(document.getElementById('produtoModal')).hide();
+                    this.limparFormulario('form-produto');
+                });
+                
+                // Formulário de Cliente
+                document.getElementById('form-cliente').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const cliente = {
+                        nome: document.getElementById('cliente-nome').value,
+                        tipo: document.getElementById('cliente-tipo').value,
+                        documento: document.getElementById('cliente-documento').value,
+                        telefone: document.getElementById('cliente-telefone').value,
+                        email: document.getElementById('cliente-email').value,
+                        endereco: document.getElementById('cliente-endereco').value,
+                        observacoes: document.getElementById('cliente-observacoes').value
+                    };
+                    
+                    // Validar documento
+                    if (cliente.tipo === 'pessoa_fisica' && !Utils.validarCPF(cliente.documento)) {
+                        Utils.mostrarToast('CPF inválido', 'danger');
+                        return;
+                    }
+                    
+                    if (cliente.tipo === 'pessoa_juridica' && !Utils.validarCNPJ(cliente.documento)) {
+                        Utils.mostrarToast('CNPJ inválido', 'danger');
+                        return;
+                    }
+                    
+                    const id = document.getElementById('cliente-id').value;
+                    if (id) {
+                        ClienteManager.editarCliente(id, cliente);
+                    } else {
+                        ClienteManager.adicionarCliente(cliente);
+                    }
+                    
+                    bootstrap.Modal.getInstance(document.getElementById('clienteModal')).hide();
+                    this.limparFormulario('form-cliente');
+                });
+                
+                // Formulário de Venda
+                document.getElementById('form-venda').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const venda = {
+                        cliente: document.getElementById('venda-cliente').value || null,
+                        dataVenda: document.getElementById('venda-data').value,
+                        desconto: parseFloat(document.getElementById('venda-desconto').value) || 0,
+                        formaPagamento: document.getElementById('venda-pagamento').value,
+                        parcelas: document.getElementById('venda-parcelas').value || 1,
+                        observacoes: document.getElementById('venda-observacoes').value
+                    };
+                    
+                    VendaManager.registrarVenda(venda);
+                    this.limparFormulario('form-venda');
+                });
+                
+                // Adicionar produto à venda
+                document.getElementById('adicionar-produto').addEventListener('click', () => {
+                    VendaManager.adicionarProdutoVenda();
+                });
+                
+                // Calcular total quando desconto mudar
+                document.getElementById('venda-desconto').addEventListener('input', () => {
+                    VendaManager.calcularTotal();
+                });
+                
+                // Mostrar/esconder parcelas
+                document.getElementById('venda-pagamento').addEventListener('change', (e) => {
+                    const parcelasContainer = document.getElementById('parcelas-container');
+                    if (e.target.value === 'crediario' || e.target.value === 'cartao') {
+                        parcelasContainer.style.display = 'block';
+                    } else {
+                        parcelasContainer.style.display = 'none';
+                    }
+                });
+                
+                // Formulário de Entrada no Caixa
+                document.getElementById('form-entrada-caixa').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const entrada = {
+                        valor: parseFloat(document.getElementById('entrada-valor').value),
+                        descricao: document.getElementById('entrada-descricao').value,
+                        data: document.getElementById('entrada-data').value || new Date().toISOString(),
+                        origem: 'manual'
+                    };
+                    
+                    CaixaManager.registrarEntrada(entrada);
+                    bootstrap.Modal.getInstance(document.getElementById('entradaCaixaModal')).hide();
+                    this.limparFormulario('form-entrada-caixa');
+                    Utils.mostrarToast('Entrada registrada com sucesso!');
+                });
+                
+                // Formulário de Saída do Caixa
+                document.getElementById('form-saida-caixa').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const saida = {
+                        valor: parseFloat(document.getElementById('saida-valor').value),
+                        descricao: document.getElementById('saida-descricao').value,
+                        data: document.getElementById('saida-data').value || new Date().toISOString(),
+                        origem: 'manual'
+                    };
+                    
+                    CaixaManager.registrarSaida(saida);
+                    bootstrap.Modal.getInstance(document.getElementById('saidaCaixaModal')).hide();
+                    this.limparFormulario('form-saida-caixa');
+                    Utils.mostrarToast('Saída registrada com sucesso!');
+                });
+                
+                // Configurar data/hora padrão nos modais
+                document.addEventListener('show.bs.modal', (e) => {
+                    const modal = e.target;
+                    const dataInput = modal.querySelector('input[type="datetime-local"]');
+                    if (dataInput && !dataInput.value) {
+                        const agora = new Date();
+                        agora.setMinutes(agora.getMinutes() - agora.getTimezoneOffset());
+                        dataInput.value = agora.toISOString().slice(0, 16);
+                    }
+                });
+                
+                // Limpar formulários ao fechar modais
+                document.addEventListener('hidden.bs.modal', (e) => {
+                    const modal = e.target;
+                    const form = modal.querySelector('form');
+                    if (form) {
+                        this.limparFormulario(form.id);
+                    }
+                });
+            }
+            
+            static configurarFiltros() {
+                // Filtros de Produtos
+                document.getElementById('searchProdutos').addEventListener('input', () => {
+                    ProdutoManager.atualizarTabela();
+                });
+                
+                document.getElementById('filterCategoria').addEventListener('change', () => {
+                    ProdutoManager.atualizarTabela();
+                });
+                
+                document.getElementById('filterEstoque').addEventListener('change', () => {
+                    ProdutoManager.atualizarTabela();
+                });
+                
+                // Filtros de Clientes
+                document.getElementById('searchClientes').addEventListener('input', () => {
+                    ClienteManager.atualizarTabela();
+                });
+                
+                document.getElementById('filterTipoCliente').addEventListener('change', () => {
+                    ClienteManager.atualizarTabela();
+                });
+                
+                // Filtros de Vendas
+                document.getElementById('searchVendas').addEventListener('input', () => {
+                    VendaManager.atualizarTabela();
+                });
+                
+                document.getElementById('filterDataInicio').addEventListener('change', () => {
+                    VendaManager.atualizarTabela();
+                });
+                
+                document.getElementById('filterDataFim').addEventListener('change', () => {
+                    VendaManager.atualizarTabela();
+                });
+                
+                document.getElementById('filterStatusVenda').addEventListener('change', () => {
+                    VendaManager.atualizarTabela();
+                });
+                
+                // Filtros de Caixa
+                document.getElementById('searchCaixa').addEventListener('input', () => {
+                    CaixaManager.atualizarTabela();
+                });
+                
+                document.getElementById('filterDataCaixaInicio').addEventListener('change', () => {
+                    CaixaManager.atualizarTabela();
+                });
+                
+                document.getElementById('filterDataCaixaFim').addEventListener('change', () => {
+                    CaixaManager.atualizarTabela();
+                });
+                
+                document.getElementById('filterTipoCaixa').addEventListener('change', () => {
+                    CaixaManager.atualizarTabela();
+                });
+                
+                // Filtros de Relatórios
+                document.getElementById('relatorio-periodo').addEventListener('change', () => {
+                    RelatoriosManager.filtrarPorPeriodo();
+                });
+            }
+            
+            static configurarExportImport() {
+                document.getElementById('exportData').addEventListener('click', () => {
+                    StorageManager.exportarTodos();
+                });
+                
+                document.getElementById('importData').addEventListener('click', () => {
+                    document.getElementById('importFile').click();
+                });
+                
+                document.getElementById('importFile').addEventListener('change', (e) => {
+                    const arquivo = e.target.files[0];
+                    if (arquivo) {
+                        StorageManager.importarTodos(arquivo);
+                    }
+                });
+            }
+            
+            static limparFormulario(formId) {
+                const form = document.getElementById(formId);
+                if (form) {
+                    form.reset();
+                    
+                    // Limpar campos hidden
+                    const hiddenInputs = form.querySelectorAll('input[type="hidden"]');
+                    hiddenInputs.forEach(input => input.value = '');
+                    
+                    // Resetar títulos de modais
+                    const modal = form.closest('.modal');
+                    if (modal) {
+                        const title = modal.querySelector('.modal-title');
+                        if (title) {
+                            if (formId === 'form-produto') {
+                                title.innerHTML = '<i class="bi bi-plus-circle"></i> Novo Produto';
+                            } else if (formId === 'form-cliente') {
+                                title.innerHTML = '<i class="bi bi-plus-circle"></i> Novo Cliente';
+                            }
+                        }
+                    }
+                }
+            }
+            
+            static carregarDados() {
+                // CORREÇÃO: Carregar dados na ordem correta
+                console.log('Carregando dados iniciais...');
+                
+                // Primeiro carregar produtos e clientes
+                ProdutoManager.atualizarTabela();
+                ProdutoManager.atualizarCategorias();
+                ClienteManager.atualizarTabela();
+                
+                // Depois carregar os selects (CORREÇÃO PRINCIPAL)
+                setTimeout(() => {
+                    ProdutoManager.carregarProdutosSelect();
+                    ClienteManager.carregarClientesSelect();
+                    console.log('Selects carregados');
+                }, 100);
+                
+                // Carregar outras seções
+                VendaManager.atualizarTabela();
+                CaixaManager.atualizarTabela();
+                CaixaManager.atualizarCards();
+                DashboardManager.atualizarDashboard();
+                RelatoriosManager.gerarRelatorios();
+                
+                console.log('Todos os dados carregados');
+            }
+        }
+
+        // Inicialização da aplicação
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Iniciando VendedorApp...');
+            InterfaceManager.init();
+            console.log('VendedorApp iniciado com sucesso!');
+        });
+
+        // Expor funções globalmente para uso nos botões HTML
+        window.ProdutoManager = ProdutoManager;
+        window.ClienteManager = ClienteManager;
+        window.VendaManager = VendaManager;
+        window.CaixaManager = CaixaManager;
+        window.DashboardManager = DashboardManager;
+        window.RelatoriosManager = RelatoriosManager;
+    </script>
+</body>
+</html>
+
